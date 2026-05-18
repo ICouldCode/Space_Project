@@ -36,3 +36,6 @@ backend/__pycache__/
 *.pyd
 *.egg-info/
 .pytest_cache/
+
+#skyfield
+*.bsp

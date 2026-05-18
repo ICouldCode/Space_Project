@@ -1,4 +1,4 @@
-from database.db import db
+from src.database.db import db
 
 class TLERepo:
     
@@ -16,7 +16,7 @@ class TLERepo:
     def get_latest(cat_nr):
         return db.fetchone(
             """
-            SELECT name, line1, line2, fetched_at 
+            SELECT id, cat_nr, name, line1, line2, fetched_at 
             FROM tle_history 
             WHERE cat_nr = %s 
             ORDER BY fetched_at DESC 

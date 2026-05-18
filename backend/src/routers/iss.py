@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from main import cache
-from services.orbital import OrbitalService
+from src.providers.cache import cache
+from src.services.orbital import OrbitalService
 
 ISS_CAT_NR = 25544
 router = APIRouter(prefix="/iss")

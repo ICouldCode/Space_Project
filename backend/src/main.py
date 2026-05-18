@@ -2,12 +2,10 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import APP_ENV
-from providers.cache import TLECache
-from routers.iss import router as iss_router
+from src.providers.cache import cache
+from src.routers.iss import router as iss_router
 
 app = FastAPI(title="Satellite Tracker API")
-
-cache = TLECache()
 
 app.add_middleware(
     CORSMiddleware,

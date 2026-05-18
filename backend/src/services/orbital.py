@@ -7,7 +7,7 @@ class OrbitalService:
 
     @staticmethod
     def get_position(satellite):
-        from providers.cache import ts
+        from src.providers.cache import ts
         t          = ts.now()
         geocentric = satellite.at(t)
         subpoint   = geocentric.subpoint()
@@ -37,7 +37,7 @@ class OrbitalService:
 
     @staticmethod
     def get_track(satellite, minutes=90):
-        from providers.cache import ts
+        from src.providers.cache import ts
         now    = ts.now()
         points = []
 
