@@ -51,18 +51,20 @@ function latLonToXYZ(lat, lon, alt){
     };
 }
 
+//get iss current position and next position
+let currentPos = new THREE.Vector3();
+let targetPos = new THREE.Vector3();
+
 async function updateISS() {
     const res = await fetch('http://localhost:8000/iss');
     const data = await res.json();
-
     const { x, y, z } = latLonToXYZ(data.latitude, data.longitude, data.altitude_km);
-    if (issMarker) {
-        issMarker.position.set(x, y, z);
-    }
+    targetPos.set(x, y, z);
+    issMarker.userData.feed = data.feed;
 }
 
 updateISS();
-setInterval(updateISS, 5000);
+setInterval(updateISS, 2000);
 
 //load sphere and apply earth texture
 const textureLoader = new THREE.TextureLoader()
@@ -116,15 +118,47 @@ const clock = new THREE.Clock();
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 
+//mouse input, raycast
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener('click', (e) => {
+    mouse.x = (e.clientX / sizes.width) * 2 - 1;
+    mouse.y = -(e.clientY / sizes.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(issMarker);
+
+    if (intersects.length > 0) {
+        openFeed(issMarker.userData.feed);
+    }
+});
+
+function openFeed(url) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; bottom: 20px; right: 20px;
+        width: 400px; height: 225px; z-index: 999; background: black;
+        border-radius: 8px; overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    `;
+    overlay.innerHTML = `
+        <iframe width="100%" height="100%" src="${url}" frameborder="0" allowfullscreen></iframe>
+        <button onclick="this.parentElement.remove()" style="position:absolute; top:8px; right:8px; background: rgba(0,0,0,0.6); color: white; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px;">✕</button>
+    `;
+    document.body.appendChild(overlay);
+}
+
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
 
-    // Render
-    renderer.render(scene, camera);
-
+    // smoothly move current toward target each frame
+    currentPos.lerp(targetPos, 0.08);
+    if (issMarker) issMarker.position.copy(currentPos);
 
     controls.update();
-
+    // Render
+    renderer.render(scene, camera);
     // Call tick again on the next frame
     window.requestAnimationFrame(tick);
 };
