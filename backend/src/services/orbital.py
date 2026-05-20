@@ -1,5 +1,6 @@
 import math
 from skyfield.api import load
+from skyfield.framelib import itrs
 
 eph = load('de421.bsp')
 
@@ -12,12 +13,9 @@ class OrbitalService:
         geocentric = satellite.at(t)
         subpoint   = geocentric.subpoint()
 
-        pos, vel  = geocentric.frame_xyz_and_velocity(geocentric.frame)
-        speed_kms = math.sqrt(
-            vel[0].km_per_s**2 +
-            vel[1].km_per_s**2 +
-            vel[2].km_per_s**2
-        )
+        _, vel = geocentric.frame_xyz_and_velocity(itrs)
+        vel_x, vel_y, vel_z = vel.km_per_s
+        speed_kms = math.sqrt(vel_x**2 + vel_y**2 + vel_z**2)
 
         MU         = 398600.4418
         a          = (MU / (2 * math.pi / satellite.model.no_kozai * (1/60))**2) ** (1/3)
